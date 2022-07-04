@@ -43,3 +43,8 @@ cmyflix uses libcjson(>=1.7.15), libcurl(>=7.68), imagemagick, ffmpeg and a TMDB
 For starters, cmyflix looks for `cmyflix.cfg` first in the same folder as the binary, then in `$HOME/.config/cmyflix/` and lastly in `/etc/cmyflix/`. Same thing applies for folder `html` and its contents.
 
 For more options and information, look in the configuration file or see the help menu, which can be invoked by passing `--help`.
+
+# Folder structure expectations
+cmyflix is a bit picky in the sense that it expects everything to be in organized folders. 
+For TV shows it expects every show to be in it's own folder, with a sub-folder for every season (plus a "Season.Extras" for anything else). Example: `/path/to/files/Name.of.TV.show/Season.1/Name.Of.TV.show.S01E01.mp4`.
+For movies, they should ideally be in a sub-folder for every movie, example: `/path/to/files/Name.of.Movie/Name.Of.Movie.mp4`. Note that multiple movies can technically be in the same sub-folder, as in `/path/to/files/Movies/Star.Wars/Revenge.of.The.Sith.mp4` and `/path/to/files/Movies/Star.Wars/Empire.Strikes.Back.mp4`.
