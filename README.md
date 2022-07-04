@@ -37,7 +37,7 @@ Either install from source with make install OR use a pre-compiled package from 
 Beware, the pre-compiled `deb` file is built using the default `libcurl4-openssl-dev` backend.
 
 # Requirements to run:
-cmyflix uses libcjson(>=1.7.15), libcurl(>=7.68), imagemagick, ffmpeg and a TMDB api key.
+cmyflix uses libcjson(>=1.7.15), libcurl(>=7.68), imagemagick, ffmpeg and a TMDB api key. Please do also note that cmyflix searches for `mp4` due to the usage of HTML5 and its supported formats.
 
 # Configuration & usage:
 For starters, cmyflix looks for `cmyflix.cfg` first in the same folder as the binary, then in `$HOME/.config/cmyflix/` and lastly in `/etc/cmyflix/`. Same thing applies for folder `html` and its contents.
