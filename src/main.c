@@ -68,7 +68,7 @@ void printVersion() {
 
 // check github to see if there is a new version
 void checkUpdate() {
-    const char *URL="https://raw.githubusercontent.com/farfalleflickan/cmyflix/master/main.c";
+    const char *URL="https://raw.githubusercontent.com/farfalleflickan/cmyflix/master/src/main.c";
     const char *getVersionCmd="curl -s %s | grep -i '#define VERSION_STRING ' | sed -e 's/#define VERSION_STRING\\| //g;s/\"//g'";
     size_t cmdStrSize=strlen(getVersionCmd)+strlen(URL)+1;
     char *cmdStr=NULL;
