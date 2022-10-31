@@ -216,7 +216,7 @@ progConfig *getConfig(char *srcPath) {
             mallocMacro(options->TMDBapi, tempPtrSize, "getConfig error");
             strlcpy(options->TMDBapi, confValue, tempPtrSize);
         } else {
-            fatalError_exit("getConfig error", "configuration file \"%s\" contains errors!\n%sUse \"cmyflix --gen-config > %s\" to generate default.\n", srcPath, HBLU, srcPath);
+            fatalError_exit("getConfig error", "configuration file \"%s\" contains errors!\nInvalid: \"%s\";\n%sUse \"cmyflix --gen-config > %s\" to generate default.\n", srcPath, confKey, HBLU, srcPath);
         }
         if (i<properties) {
             pos+=offset[i]+offset[i+1];

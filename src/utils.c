@@ -983,3 +983,17 @@ long double getElapsedTime() {
     gettimeofday(&currentTime, NULL);
     return (currentTime.tv_sec - timeProgStart.tv_sec)+((long double)(currentTime.tv_usec - timeProgStart.tv_usec)/1000000);
 }
+
+// checks if last character in string is '/' and appends it if needed
+char *appendSlash(char *origStr) {
+    char *newStr=NULL;
+    size_t origLen=strlen(origStr);
+    if (origStr[origLen]=='/') {
+        newStr=origStr;
+    } else {
+        origLen+=2;
+        mallocMacro(newStr, origLen, "cmyflix error");
+        snprintf(newStr, origLen, "%s/", origStr);
+    }
+    return newStr;
+}

@@ -206,27 +206,33 @@ void copyExtras(progConfig *conf, progFlags runFlags, char *htmlFolder, char *de
                 tempStr=dirname(conf->TVhtml);
             }
             if (tempStr!=NULL) {
-                char *cmdStr=NULL;
-                size_t tempStrSize=strlen("cp -r /*  ")+strlen(extPath)+strlen(tempStr)+1;
-                mallocMacro(cmdStr, tempStrSize, "cmyflix error");
-                snprintf(cmdStr, tempStrSize, "cp -r %s/* %s", extPath, tempStr);
-                resetSTDColors();
-                FILE *cmdRet=popen(cmdStr, "r");
-                if (cmdRet==NULL) {
-                    if (pclose(cmdRet)!=0) {
-                        printError("cmyflix", false, HRED, "%s\n", strerror(errno)); 
-                    }
-                    tryFree(cmdStr);
-                    fatalError_exit("cmyflix error", "something went wrong while trying to copy HTML resources from '%s' to '%s';\n", extPath, tempStr);
-               } else {
-                   if (pclose(cmdRet)!=0) {
-                       printError("cmyflix", false, HRED, "something went wrong while trying to copy HTML resources from '%s' to '%s';\n", extPath, tempStr);
-                       printError("cmyflix", false, HRED, "%s\n", strerror(errno));                       
+                char *tempStr2=appendSlash(tempStr);
+                if (checkFolder(tempStr2, true)==0) {
+                    char *cmdStr=NULL;
+                    size_t tempStrSize=strlen("cp -r /*  ")+strlen(extPath)+strlen(tempStr2)+1;
+                    mallocMacro(cmdStr, tempStrSize, "cmyflix error");
+                    snprintf(cmdStr, tempStrSize, "cp -r %s/* %s", extPath, tempStr2);
+                    resetSTDColors();
+                    FILE *cmdRet=popen(cmdStr, "r");
+                    if (cmdRet==NULL) {
+                        if (pclose(cmdRet)!=0) {
+                            printError("cmyflix", false, HRED, "%s\n", strerror(errno)); 
+                        }
+                        tryFree(cmdStr);
+                        fatalError_exit("cmyflix error", "something went wrong while trying to copy HTML resources from '%s' to '%s';\n", extPath, tempStr2);
                    } else {
-                       printInfo("", false, "Copied HTML resources from '%s' to '%s';\n", extPath, tempStr);
+                       if (pclose(cmdRet)!=0) {
+                           printError("cmyflix", false, HRED, "something went wrong while trying to copy HTML resources from '%s' to '%s';\n", extPath, tempStr2);
+                           printError("cmyflix", false, HRED, "%s\n", strerror(errno));                       
+                       } else {
+                           printInfo("", false, "Copied HTML resources from '%s' to '%s';\n", extPath, tempStr2);
+                       }
                    }
-               }
-               tryFree(cmdStr);
+                   tryFree(cmdStr);
+                }
+                if (tempStr2!=tempStr) {
+                    tryFree(tempStr2);
+                }
             } else {
                 printError("cmyflix error", false, HRED, "could not get path to copy HTML resources to.\n");
             }
@@ -403,7 +409,6 @@ int main(int argc, char * argv[]) {
             printVersion();
             exit(EXIT_SUCCESS);
         } else if (currOption=='9') { // --gen-config
-            resetSTDColors();
             printf("%s\n", DEF_CONF);
             exit(EXIT_SUCCESS);
         } else if (currOption=='c') { // --clean

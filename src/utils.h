@@ -140,3 +140,4 @@ void printBitFlags(unsigned bits);
 int fixMode(progConfig *conf, progFlags flags, const char *toFix, const char *id, const char *poster, const char *newName, bool refreshMode);
 int writeCharToFile(const char *str, const char *fileStr);
 long double getElapsedTime();
+char *appendSlash(char *origStr);
