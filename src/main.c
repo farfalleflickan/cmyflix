@@ -17,7 +17,7 @@
 #include "main.h"
 
 #define REPO_URL "https://github.com/farfalleflickan/cmyflix"
-#define VERSION_STRING "0.1"
+#define VERSION_STRING "0.2"
 
 // GLOBAL VARIABLES
 FILE *LOGFILE=NULL;
