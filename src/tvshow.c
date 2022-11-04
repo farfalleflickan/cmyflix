@@ -574,7 +574,7 @@ char *getEpisodeName(progConfig *conf, unsigned int showId, char *seNum, char *e
 
 void createShowsHTML(progConfig *conf, fileList *list) {
     printInfo("createShowsHTML info", true, "building HTML for TV shows...\n");
-    if (list==NULL || list->listSize<2) {
+    if (list==NULL || list->dataSize==0) {
         fatalError_abort("createShowsHTML error", "list was NULL\n");
     }
     if (checkFolder(conf->TVhtml, true)==-1) {
