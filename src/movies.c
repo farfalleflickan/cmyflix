@@ -301,6 +301,12 @@ char *getMoviePoster(progConfig *conf, int tmdb_id) {
     if (posterURL!=NULL) {
         imgURL=getPoster(posterURL, conf, conf->prefImgWidthM, conf->prefImgRatioM, conf->prefImgLangM);
         if (imgURL==NULL) {
+            printError("getMoviePoster error", true, HRED, "failed while using URL '%s';\nRetrying without language option...\n", posterURL);
+            posterURL[0]='\0';
+            snprintf(posterURL, posterURLSize, "%s%s%d%s%s", tmdbSite, tmdbM, tmdb_id, tmdbP, conf->TMDBapi);
+            imgURL=getPoster(posterURL, conf, conf->prefImgWidthM, conf->prefImgRatioM, NULL);
+        }
+        if (imgURL==NULL) {
             printError("getMoviePoster error", true, HRED, "failed while using URL '%s';\n", posterURL);
         } else {
             printInfo("getMoviePoster info", true, "got poster for \"%d\", URL: \"%s\";\n", tmdb_id, imgURL);
@@ -327,7 +333,7 @@ char *getMoviePoster(progConfig *conf, int tmdb_id) {
                 }
             }
         }
-        tryFree(posterURL);
+    tryFree(posterURL);
     } else {
         printError("getMoviePoster error", false, HRED, "could not build URL request string, something went wrong...\n");
     }

@@ -780,7 +780,7 @@ char *getPoster(const char *posterURL, progConfig *conf, int prefImgWidth, doubl
                     cJSON *lang=cJSON_DetachItemFromObject(item, "iso_639_1");
                     
                     if ((width!=NULL && cJSON_GetNumberValue(width)==prefImgWidth) || (ratio!=NULL && cJSON_GetNumberValue(ratio)==prefImgRatio)) {
-                        if (lang!=NULL && cJSON_GetStringValue(lang)!=NULL && strcmp(cJSON_GetStringValue(lang), prefImgLang)==0) {
+                        if ((prefImgLang!=NULL && lang!=NULL && cJSON_GetStringValue(lang)!=NULL && strcmp(cJSON_GetStringValue(lang), prefImgLang)==0) || prefImgLang==NULL) {
                             cJSON *imgStr=cJSON_DetachItemFromObject(item, "file_path");
                             if (imgStr!=NULL && cJSON_GetStringValue(imgStr)!=NULL) {
                                 size_t urlLen=strlen(tmdbImg)+strlen(cJSON_GetStringValue(imgStr))+1;
@@ -805,7 +805,7 @@ char *getPoster(const char *posterURL, progConfig *conf, int prefImgWidth, doubl
                 cJSON_Delete(item);
             }
             if (imgURL==NULL) {
-                printError("getPoster warning", true, HYEL, "request error, URL: '%s';\nitem==NULL - json_posters was:\n", posterURL);
+                printError("getPoster warning", true, HYEL, "request error, URL: '%s';\nCould not find a poster - json_posters was:\n", posterURL);
                 char *tempStr=cJSON_Print(json_posters);
                 printError("", true, COLOR_RESET, tempStr);
                 printError("", true, HYEL, "\nEND;\n");

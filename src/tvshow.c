@@ -495,31 +495,46 @@ char *getShowPoster(progConfig *conf, unsigned int tmdb_id) {
     mallocMacro(posterURL, posterURLSize, "getShowPoster error");
     posterURL[0]='\0';
     snprintf(posterURL, posterURLSize, "%s%s%u%s%s%s,%s", tmdbSite, tmdbTV, tmdb_id, tmdbP, conf->TMDBapi, tmdbP_Opts, conf->prefImgLangTV);
-    imgURL=getPoster(posterURL, conf, conf->prefImgWidthTV, conf->prefImgRatioTV, conf->prefImgLangTV);
-
-    printInfo("getShowPoster info", true, "got poster for \"%d\", URL: \"%s\";\n", tmdb_id, imgURL);
-    if (imgURL!=NULL && conf->dTVImg) { // if image should actually be downloaded, otherwise will just link to imgURL
-        if (checkFolder(conf->dTVFolder, true)==0) {
-            size_t dlFileStrLen=strlen(imgURL)+strlen(conf->dTVFolder);
-            char *dlFileName=NULL;
-            mallocMacro(dlFileName, dlFileStrLen, "getShowPoster error");
-            dlFileName[0]='\0';
-            snprintf(dlFileName, dlFileStrLen, "%s%s", conf->dTVFolder, strrchr(imgURL, '/')+1);
-            
-            if (dlFile(conf, imgURL, dlFileName)==CURLE_OK) { // downloaded poster!
-                imgURL=realloc(imgURL, dlFileStrLen+1);
-                if (imgURL==NULL)
-                    fatalError_abort("getShowPoster error", "could not realloc;\nError: %s;\n", strerror(errno));
-                
-                strlcpy(imgURL, dlFileName, dlFileStrLen);
-                if (conf->compressImgTV) {
-                    imgURL=compressImg(conf->compressImgTVCmd, imgURL, true);
-                }
-            } 
-            tryFree(dlFileName);
+    if (posterURL!=NULL) {
+        imgURL=getPoster(posterURL, conf, conf->prefImgWidthTV, conf->prefImgRatioTV, conf->prefImgLangTV);
+        
+        if (imgURL==NULL) {
+            printError("getShowPoster error", true, HRED, "failed while using URL '%s';\nRetrying without language option...\n", posterURL);
+            posterURL[0]='\0';
+            snprintf(posterURL, posterURLSize, "%s%s%u%s%s", tmdbSite, tmdbTV, tmdb_id, tmdbP, conf->TMDBapi);
+            imgURL=getPoster(posterURL, conf, conf->prefImgWidthTV, conf->prefImgRatioTV, NULL);
         }
-    }
+        
+        if (imgURL==NULL) {
+            printError("getShowPoster error", true, HRED, "failed while using URL '%s';\n", posterURL);
+        } else {
+            printInfo("getShowPoster info", true, "got poster for \"%d\", URL: \"%s\";\n", tmdb_id, imgURL);
+            if (imgURL!=NULL && conf->dTVImg) { // if image should actually be downloaded, otherwise will just link to imgURL
+                if (checkFolder(conf->dTVFolder, true)==0) {
+                    size_t dlFileStrLen=strlen(imgURL)+strlen(conf->dTVFolder);
+                    char *dlFileName=NULL;
+                    mallocMacro(dlFileName, dlFileStrLen, "getShowPoster error");
+                    dlFileName[0]='\0';
+                    snprintf(dlFileName, dlFileStrLen, "%s%s", conf->dTVFolder, strrchr(imgURL, '/')+1);
+                    
+                    if (dlFile(conf, imgURL, dlFileName)==CURLE_OK) { // downloaded poster!
+                        imgURL=realloc(imgURL, dlFileStrLen+1);
+                        if (imgURL==NULL)
+                            fatalError_abort("getShowPoster error", "could not realloc;\nError: %s;\n", strerror(errno));
+                        
+                        strlcpy(imgURL, dlFileName, dlFileStrLen);
+                        if (conf->compressImgTV) {
+                            imgURL=compressImg(conf->compressImgTVCmd, imgURL, true);
+                        }
+                    } 
+                    tryFree(dlFileName);
+                }
+            }
+        }
     tryFree(posterURL);
+    } else {
+        printError("getShowPoster error", false, HRED, "could not build URL request string, something went wrong...\n");
+    }
     return imgURL;
 }
 
@@ -677,11 +692,6 @@ void *showHTML(void *threadArg) {
         fatalError_abort("showHTML error", "showName==NULL; JSON was:\n%s\n--- END ---\n", cJSON_Print(myJSON));
     }
 
-    char *numOfSeasonsStr=cJSON_GetStringValue(cJSON_GetObjectItem(myJSON, "Seasons"));
-    int myNumSeasons=0;
-    if (numOfSeasonsStr!=NULL) {
-        myNumSeasons=parseStrToInt(numOfSeasonsStr);
-    }
     int uuid=thisThread->id;
     cJSON *episodesArray=cJSON_GetObjectItem(myJSON, "Episodes");
     cJSON *extrasArray=cJSON_GetObjectItem(myJSON, "Extras");
@@ -689,7 +699,6 @@ void *showHTML(void *threadArg) {
         fatalError_abort("showHTML error", " episodesArray or extrasArray were equal to NULL; JSON was:\n%s\n--- END ---\n ", cJSON_Print(myJSON));
     }
     printInfo("showHTML info", true, "building HTML for \"%s\";\n", showName);
-
     cJSON *episode=NULL;
 
     addData(this_show, SHOW_HTML_TOP);
@@ -702,15 +711,22 @@ void *showHTML(void *threadArg) {
     snprintf(tempStr, tempStrSize, SHOW_HTML_SEL, uuid);
     addData(this_show, tempStr);
 
-    while (currSeason<myNumSeasons) {
-        currSeason++;
-        tempStrSize=strlen(SHOW_HTML_OPT_SEASON)+intSize(currSeason)+intSize(currSeason)+1;
-        tempStr=realloc(tempStr, tempStrSize);
-        if (tempStr==NULL) {
-            fatalError_abort("showHTML error", "could not realloc;\nError: %s;\n", strerror(errno));
+    cJSON_ArrayForEach(episode, episodesArray) {
+        int this_seasonNum=0;
+        cJSON *jsonSeason=cJSON_GetObjectItem(episode, "Season");
+        if (jsonSeason!=NULL) {
+            this_seasonNum=parseStrToInt(cJSON_GetStringValue(jsonSeason));
         }
-        snprintf(tempStr, tempStrSize, SHOW_HTML_OPT_SEASON, currSeason, currSeason);
-        addData(this_show, tempStr);
+        if (this_seasonNum>currSeason) {
+            currSeason=this_seasonNum;
+            tempStrSize=strlen(SHOW_HTML_OPT_SEASON)+intSize(currSeason)+intSize(currSeason)+1;
+            tempStr=realloc(tempStr, tempStrSize);
+            if (tempStr==NULL) {
+                fatalError_abort("showHTML error", "could not realloc;\nError: %s;\n", strerror(errno));
+            }
+            snprintf(tempStr, tempStrSize, SHOW_HTML_OPT_SEASON, currSeason, currSeason);
+            addData(this_show, tempStr);
+        }
     }
     if (extrasArray!=NULL && cJSON_GetArraySize(extrasArray)>0) {
         currSeason++;
@@ -801,7 +817,7 @@ void episodeHTML(fileList *this_show, progConfig *conf, cJSON *episode, int *cur
         if (*currSeason>0) { // new season, so close prev season list
             addData(this_show, "\n</ul>\n");
         }
-        (*currSeason)++;
+        (*currSeason)=this_seasonNum;
         tempStrSize=intSize(*uuid)+intSize(*currSeason)+strlen(SHOW_HTML_UL)+1;
         tempStr=realloc(tempStr, tempStrSize);
         if (tempStr==NULL) {
