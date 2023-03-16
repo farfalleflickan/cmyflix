@@ -49,7 +49,7 @@ struct fileList *createTVShowDB(progConfig *conf) {
                             break;
                         }
                     } else {
-                        printError("createTVShowDB warning", false, "some errors occured while reading \"%s\", parts of the database will be rebuilt from scratch...\n", conf->dbNameTV);
+                        printError("createTVShowDB warning", false, HYEL, "some errors occured while reading \"%s\", parts of the database will be rebuilt from scratch...\n", conf->dbNameTV);
                         threadObj[i].oldJSON=NULL;
                         conf->tvDB_exists=false;
                         cJSON_Delete(tempJSON);

@@ -17,7 +17,7 @@
 #include "main.h"
 
 #define REPO_URL "https://github.com/farfalleflickan/cmyflix"
-#define VERSION_STRING "0.21"
+#define VERSION_STRING "0.22"
 
 // GLOBAL VARIABLES
 FILE *LOGFILE=NULL;
@@ -268,8 +268,13 @@ void cleanMode(progConfig *conf, progFlags flags) {
         if (threadArgTV.oldJSON!=NULL) {
             char *newDB=cJSON_Print(threadArgTV.oldJSON);
             cJSON_Delete(threadArgTV.oldJSON);
+            freeFileMem(conf->dbNameTV, conf->tvDB_str);
             writeCharToFile(newDB, conf->dbNameTV);
             tryFree(newDB);
+            cJSON_Delete(conf->JSON_tvDB);
+            conf->JSON_tvDB=NULL;
+            conf->tvDB_str=fileToMem(conf->dbNameTV);
+            conf->JSON_tvDB=cJSON_Parse(conf->tvDB_str);
         } else {
             printInfo("cleanMode warning", true, "oldJSON was NULL!\n");
         }
@@ -279,8 +284,13 @@ void cleanMode(progConfig *conf, progFlags flags) {
         if (threadArgMovies.oldJSON!=NULL) {
             char *newDB=cJSON_Print(threadArgMovies.oldJSON);
             cJSON_Delete(threadArgMovies.oldJSON);
+            freeFileMem(conf->dbNameMovie, conf->moDB_str);
             writeCharToFile(newDB, conf->dbNameMovie);
             tryFree(newDB);
+            cJSON_Delete(conf->JSON_moDB);
+            conf->JSON_moDB=NULL;
+            conf->moDB_str=fileToMem(conf->dbNameMovie);
+            conf->JSON_moDB=cJSON_Parse(conf->moDB_str);
         } else {
             printInfo("cleanMode warning", true, "oldJSON was NULL!\n");
         }
