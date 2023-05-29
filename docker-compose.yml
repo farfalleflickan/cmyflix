@@ -1,0 +1,12 @@
+---
+version: "2.1"
+services:
+  cmyflix:
+    image: cmyflix
+    container_name: cmyflix
+    volumes:
+      - /path/to/tvshows/:/etc/cmyflix/TV/
+      - /path/to/movies/:/etc/cmyflix/Movies/
+    ports:
+      - 80:80
+    restart: unless-stopped

@@ -1,3 +1,4 @@
+
 # cmyflix
 *A Netflix clone, now in C!*
 
@@ -43,6 +44,19 @@ cmyflix uses libcjson(>=1.7.15), libcurl(>=7.68), imagemagick, ffmpeg and a TMDB
 For starters, cmyflix looks for `cmyflix.cfg` first in the same folder as the binary, then in `$HOME/.config/cmyflix/` and lastly in `/etc/cmyflix/`. Same thing applies for folder `html` and its contents.
 
 For more options and information, look in the configuration file or see the help menu, which can be invoked by passing `--help`.
+
+# Docker
+1. Build the image
+```bash
+docker build -t cmyflix
+```
+2. Edit the docker compose.yml file
+replace: `/path/to/your/movie` and `/path/to/your/tvshows`
+optionnal: change port (default: `80`0
+3. Start the docker with docker-compose
+```bash
+docker-compose up -d
+``` 
 
 # Folder structure expectations
 cmyflix is a bit picky in the sense that it expects everything to be in organized folders. 
