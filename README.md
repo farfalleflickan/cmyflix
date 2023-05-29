@@ -57,6 +57,8 @@ optionnal: change port (default: `80`0
 ```bash
 docker-compose up -d
 ``` 
+4. Test
+go on http://yourip:yourport/tv or http://yourip:yourport/movies
 
 # Folder structure expectations
 cmyflix is a bit picky in the sense that it expects everything to be in organized folders. 
