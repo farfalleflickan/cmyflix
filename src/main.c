@@ -17,7 +17,7 @@
 #include "main.h"
 
 #define REPO_URL "https://github.com/farfalleflickan/cmyflix"
-#define VERSION_STRING "0.22"
+#define VERSION_STRING "0.23"
 
 // GLOBAL VARIABLES
 FILE *LOGFILE=NULL;
@@ -78,9 +78,6 @@ void checkUpdate() {
     resetSTDColors();
     FILE *cmdRet=popen(cmdStr, "r");
     if (cmdRet==NULL) {
-        if (pclose(cmdRet)!=0) {
-            printError("cmyflix", false, HRED, "%s\n", strerror(errno)); 
-        }
         tryFree(cmdStr);
         fatalError_exit("checkUpdate", "something went wrong while trying to check for an update, errno is: %s\n", strerror(errno));
     } else {
@@ -215,9 +212,6 @@ void copyExtras(progConfig *conf, progFlags runFlags, char *htmlFolder, char *de
                     resetSTDColors();
                     FILE *cmdRet=popen(cmdStr, "r");
                     if (cmdRet==NULL) {
-                        if (pclose(cmdRet)!=0) {
-                            printError("cmyflix", false, HRED, "%s\n", strerror(errno)); 
-                        }
                         tryFree(cmdStr);
                         fatalError_exit("cmyflix error", "something went wrong while trying to copy HTML resources from '%s' to '%s';\n", extPath, tempStr2);
                    } else {

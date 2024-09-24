@@ -287,7 +287,7 @@ progConfig *getConfig(char *srcPath) {
 
                 if (setrlimit(RLIMIT_NOFILE, &(options->newLim))==-1){
                     confCleanup(options);
-                    fatalError_abort("getConfig error", "could not set new fileLimit, error: %s\n", errno, strerror(errno));
+                    fatalError_abort("getConfig error", "could not set new fileLimit, error: %s\n", strerror(errno));
                 }
             }
         }

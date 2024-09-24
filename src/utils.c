@@ -791,10 +791,10 @@ char *getPoster(const char *posterURL, progConfig *conf, int prefImgWidth, doubl
                             }
                             cJSON_Delete(imgStr);
                         }
-                        cJSON_Delete(width);
-                        cJSON_Delete(ratio);
-                        cJSON_Delete(lang);
                     }
+                    cJSON_Delete(width);
+                    cJSON_Delete(ratio);
+                    cJSON_Delete(lang);
                 } else {
                     printError("getPoster warning", true, HYEL, "request error, URL: '%s';\nitem==NULL - json_posters was:\n", posterURL);
                     char *tempStr=cJSON_Print(json_posters);
@@ -811,7 +811,6 @@ char *getPoster(const char *posterURL, progConfig *conf, int prefImgWidth, doubl
                 printError("", true, HYEL, "\nEND;\n");
                 tryFree(tempStr);
             } 
-            cJSON_Delete(json_posters);
         } else {
             printError("getPoster warning", true, HYEL, "request error, URL: '%s';\njson_posters==NULL - json_root was:\n", posterURL);
             char *tempStr=cJSON_Print(json_root);
@@ -819,10 +818,11 @@ char *getPoster(const char *posterURL, progConfig *conf, int prefImgWidth, doubl
             printError("", true, HYEL, "\nEND;\n");
             tryFree(tempStr);
         }
-        cJSON_Delete(json_root);
+        cJSON_Delete(json_posters);
     } else {
         printError("getPoster warning", true, HYEL, "request error, URL: '%s';\njson_root==NULL\n", posterURL);
     }
+    cJSON_Delete(json_root);
     freeBlock(mem);
     return imgURL;
 }
