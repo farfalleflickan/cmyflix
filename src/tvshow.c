@@ -1004,6 +1004,7 @@ void *cleanShow(void *threadArg) {
         }
         if ((episodesArraySize+extrasArraySize) == 0) {
             //TODO: parse "Show" tag for filename then delete HTML show file?
+            cJSON_Delete(thisThread->oldJSON);
             thisThread->oldJSON = NULL;
         }
     }
