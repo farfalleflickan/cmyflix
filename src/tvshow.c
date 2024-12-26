@@ -909,7 +909,9 @@ void *cleanTV(void *threadArg) {
         cJSON *newJSON=cJSON_CreateArray();
         for (i=0; i<numThreads; i++) {
             pthread_join(threads[i], NULL);
-            cJSON_AddItemToArray(newJSON, threadObj[i].oldJSON);
+            if (threadObj[i].oldJSON != NULL) {
+                cJSON_AddItemToArray(newJSON, threadObj[i].oldJSON);
+            }
         }
         thisThread->oldJSON=cJSON_Duplicate(newJSON, true);
         cJSON_Delete(newJSON);
@@ -924,40 +926,86 @@ void *cleanTV(void *threadArg) {
 void *cleanShow(void *threadArg) {
     threadStruct *thisThread=threadArg;
     cJSON *show=thisThread->oldJSON;
+    cJSON *episodesArray;
+    cJSON *extrasArray;
+    int episodesArraySize=0;
+    int extrasArraySize=0;
 
-    if (show!=NULL && cJSON_GetObjectItem(show, "Episodes")!=NULL) {
-        cJSON *episodesArray=cJSON_Duplicate(cJSON_GetObjectItem(show, "Episodes"), true);
-        cJSON *episode=NULL;
-        int i=0, numDeleted=0;
-        cJSON_ArrayForEach(episode, episodesArray) {
-            if (episode!=NULL && cJSON_GetObjectItem(episode, "File")!=NULL) {
-                char *tempStr=cJSON_GetStringValue(cJSON_GetObjectItem(episode, "File"));
-                if (tempStr!=NULL) {
-                    if (access(tempStr, F_OK)==0) {
-                        cJSON *subsArray=cJSON_Duplicate(cJSON_GetObjectItem(episode, "Subs"), true);
-                        int j=0, subsDeleted=0;
-                        cJSON *sub=NULL;
-                        cJSON_ArrayForEach(sub, subsArray) {
-                            char *tempSubStr=cJSON_GetStringValue(cJSON_GetObjectItem(sub, "subFile")); 
-                            if (tempSubStr!=NULL) {
-                                if (access(tempSubStr, F_OK)!=0) {
-                                    cJSON *tempSubs=cJSON_GetObjectItem(cJSON_GetArrayItem(cJSON_GetObjectItem(show, "Episodes"), i-numDeleted), "Subs");
-                                    cJSON_DeleteItemFromArray(tempSubs, j-subsDeleted);
-                                    subsDeleted++;
+    if (show!=NULL) {
+        if (cJSON_GetObjectItem(show, "Episodes")!=NULL) {
+            episodesArray=cJSON_Duplicate(cJSON_GetObjectItem(show, "Episodes"), true);
+            cJSON *episode=NULL;
+            int i=0, numDeleted=0;
+            cJSON_ArrayForEach(episode, episodesArray) {
+                if (episode!=NULL && cJSON_GetObjectItem(episode, "File")!=NULL) {
+                    char *tempStr=cJSON_GetStringValue(cJSON_GetObjectItem(episode, "File"));
+                    if (tempStr!=NULL) {
+                        if (access(tempStr, F_OK)==0) {
+                            cJSON *subsArray=cJSON_Duplicate(cJSON_GetObjectItem(episode, "Subs"), true);
+                            int j=0, subsDeleted=0;
+                            cJSON *sub=NULL;
+                            cJSON_ArrayForEach(sub, subsArray) {
+                                char *tempSubStr=cJSON_GetStringValue(cJSON_GetObjectItem(sub, "subFile")); 
+                                if (tempSubStr!=NULL) {
+                                    if (access(tempSubStr, F_OK)!=0) {
+                                        cJSON *tempSubs=cJSON_GetObjectItem(cJSON_GetArrayItem(cJSON_GetObjectItem(show, "Episodes"), i-numDeleted), "Subs");
+                                        cJSON_DeleteItemFromArray(tempSubs, j-subsDeleted);
+                                        subsDeleted++;
+                                    }
                                 }
+                                j++;
                             }
-                            j++;
+                            cJSON_Delete(subsArray);
+                        } else {
+                            cJSON_DeleteItemFromArray(cJSON_GetObjectItem(show, "Episodes"), i-numDeleted);
+                            numDeleted++;
                         }
-                        cJSON_Delete(subsArray);
-                    } else {
-                        cJSON_DeleteItemFromArray(cJSON_GetObjectItem(show, "Episodes"), i-numDeleted);
-                        numDeleted++;
                     }
                 }
+                i++;
             }
-            i++;
+            episodesArraySize=cJSON_GetArraySize(episodesArray);
+            cJSON_Delete(episodesArray);
         }
-        cJSON_Delete(episodesArray);
+        if (cJSON_GetObjectItem(show, "Extras")!=NULL) {
+            extrasArray=cJSON_Duplicate(cJSON_GetObjectItem(show, "Extras"), true);
+            cJSON *extra=NULL;
+            int i=0, numDeleted=0;
+            cJSON_ArrayForEach(extra, extrasArray) {
+                if (extra!=NULL && cJSON_GetObjectItem(extra, "File")!=NULL) {
+                    char *tempStr=cJSON_GetStringValue(cJSON_GetObjectItem(extra, "File"));
+                    if (tempStr!=NULL) {
+                        if (access(tempStr, F_OK)==0) {
+                            cJSON *subsArray=cJSON_Duplicate(cJSON_GetObjectItem(extra, "Subs"), true);
+                            int j=0, subsDeleted=0;
+                            cJSON *sub=NULL;
+                            cJSON_ArrayForEach(sub, subsArray) {
+                                char *tempSubStr=cJSON_GetStringValue(cJSON_GetObjectItem(sub, "subFile")); 
+                                if (tempSubStr!=NULL) {
+                                    if (access(tempSubStr, F_OK)!=0) {
+                                        cJSON *tempSubs=cJSON_GetObjectItem(cJSON_GetArrayItem(cJSON_GetObjectItem(show, "Extras"), i-numDeleted), "Subs");
+                                        cJSON_DeleteItemFromArray(tempSubs, j-subsDeleted);
+                                        subsDeleted++;
+                                    }
+                                }
+                                j++;
+                            }
+                            cJSON_Delete(subsArray);
+                        } else {
+                            cJSON_DeleteItemFromArray(cJSON_GetObjectItem(show, "Extras"), i-numDeleted);
+                            numDeleted++;
+                        }
+                    }
+                }
+                i++;
+            }
+            extrasArraySize=cJSON_GetArraySize(extrasArray);
+            cJSON_Delete(extrasArray);
+        }
+        if ((episodesArraySize+extrasArraySize) == 0) {
+            //TODO: parse "Show" tag for filename then delete HTML show file?
+            thisThread->oldJSON = NULL;
+        }
     }
 
     return NULL;
