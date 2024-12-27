@@ -599,7 +599,7 @@ void createShowsHTML(progConfig *conf, fileList *list) {
     mallocMacro(threads, sizeof(pthread_t)*list->listSize, "createShowsHTML error");
     threadStruct *threadObj=NULL;
     mallocMacro(threadObj, sizeof(threadStruct)*list->listSize, "createShowsHTML error");
-    size_t i=0;
+    int i=0;
     for (fileList *temp=list; temp!=NULL; temp=temp->next) {
         threadObj[i].conf=conf;
         threadObj[i].data=temp->data;        
@@ -611,12 +611,11 @@ void createShowsHTML(progConfig *conf, fileList *list) {
         i++;
     }
 
-    i=0;
     fileList *htmlList=newList();
     addData(htmlList, TV_HTML_TOP);
     
     char *htmlStr=NULL;
-    for (fileList *temp=list; temp!=NULL; temp=temp->next) {
+    for (i--; i>=0; i--) {
         pthread_join(threads[i], NULL);
         char *showFile=NULL;
         char *showPoster=NULL;
@@ -650,7 +649,6 @@ void createShowsHTML(progConfig *conf, fileList *list) {
         freeList(threadObj[i].list);
         tryFree(showFile);
         tryFree(showPoster);
-        i++;
     }
     addData(htmlList, TV_HTML_BOT);
     fileListToFile(htmlList, conf->TVhtml, "", "");

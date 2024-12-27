@@ -4,7 +4,7 @@
 
 #define TV_HTML_TOP "<!DOCTYPE html>\n<html>\n<head>\n<title>cmyflix</title>\n<meta http-equiv=\"Content-type\" content=\"text/html;charset=UTF-8\">\n<meta name=\"description\" content=\"Daria Rostirolla\">\n<meta name=\"keywords\" content=\"HTML, CSS\">\n<meta name=\"author\" content=\"Daria Rostirolla\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<link href=\"css/tv.css\" rel=\"stylesheet\" type=\"text/css\">\n<link rel=\"icon\" type=\"image/png\" href=\"img/favicon.png\">\n</head>\n<body>\n<script type=\"text/javascript\" src=\"js/mainTVScript.js\"></script>\n<div id=\"wrapper\">\n"
 
-#define TV_HTML_FRAME "<div class=\"showDiv\">\n<input id=\"A%zu\" class=\"myBtn\" alt=\"%s\" onclick=\"javascript:setFrame(this, \'%s\' )\" type=\"image\" src=\"%s\" onload=\"javascript:setAlt(this, \'%s\')\">\n<div id=\"B%zu\" class=\"modal\">\n<div id=\"frameDiv%zu\" class=\"modal-content\">\n<iframe id=\"IN%zu\" src=\"\" frameborder=\"0\" onload=\"javascript:resizeFrame(this)\" allowfullscreen></iframe>\n</div>\n</div>\n</div>\n"
+#define TV_HTML_FRAME "<div class=\"showDiv\">\n<input id=\"A%d\" class=\"myBtn\" alt=\"%s\" onclick=\"javascript:setFrame(this, \'%s\' )\" type=\"image\" src=\"%s\" onload=\"javascript:setAlt(this, \'%s\')\">\n<div id=\"B%d\" class=\"modal\">\n<div id=\"frameDiv%d\" class=\"modal-content\">\n<iframe id=\"IN%d\" src=\"\" frameborder=\"0\" onload=\"javascript:resizeFrame(this)\" allowfullscreen></iframe>\n</div>\n</div>\n</div>\n"
 
 #define TV_HTML_BOT "\n<div id=\"paddingDiv\">\n</div>\n</div>\n</body>\n</html>"
 

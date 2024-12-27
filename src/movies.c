@@ -362,11 +362,10 @@ void createMoviesHTML(progConfig *conf, fileList *list) {
         pthread_create(&threads[i], NULL, movieHTML, (void *) &threadObj[i]);
     }
 
-    i=0;
     fileList *htmlList=newList();
     addData(htmlList, MOVIE_HTML_TOP);
 
-    for (fileList *temp=list; temp!=NULL; temp=temp->next, i++) {
+    for (i--; i>=0; i--) {
         pthread_join(threads[i], NULL);
         for (size_t j=0; j<threadObj[i].list->dataSize; j++) {
             addData(htmlList, threadObj[i].list->data[j]);
