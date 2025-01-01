@@ -936,7 +936,7 @@ int fixMode(progConfig *conf, progFlags flags, const char *toFix, const char *id
                     }
                 }
 
-                if ((flags & SHOWS_MODE) && conf->getEpisodeName && refreshMode) {
+                if ((flags & SHOWS_MODE) && (flags & FIX_TITLES_MODE) && refreshMode) {
                     int tempID=parseStrToInt(id);
                     cJSON *this_episodes=cJSON_GetObjectItem(element, "Episodes");
                     cJSON *episode=NULL;

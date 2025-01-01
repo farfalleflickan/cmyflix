@@ -11,7 +11,8 @@ typedef enum {
     FIX_ID_MODE     = 1 << 6, // FIX MODE ID
     FIX_POSTER_MODE = 1 << 7, // FIX MODE POSTER
     FIX_NAME_MODE   = 1 << 8, // FIX MODE NAME
-    FIX_REFR_MODE   = 1 << 9  // FIX MODE REFRESH 
+    FIX_TITLES_MODE = 1 << 9, // FIX MODE NAME
+    FIX_REFR_MODE   = 1 << 10 // FIX MODE REFRESH 
 } progFlags;
 
 void printHelp();

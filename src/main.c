@@ -43,7 +43,8 @@ void printHelp() {
     printf("  \t\t--id \t 12345\t\tspecifies new id for fix mode\n");
     printf("  \t\t--name \t \"new name\"\tspecifies new name for fix mode\n");
     printf("  \t\t--poster path/to/file\tspecifies new poster for fix mode\n");
-    printf("  \t\t--refresh\t\trefresh info of \"name\", so refreshes episode names in TV shows (also re-downloads poster if --poster \"\" is passed)\n");
+    printf("  \t\t--titles\t\trefreshes the episode titles\n");
+    printf("  \t\t--refresh\t\trefresh info of \"name\", re-downloads poster if --poster \"\" is passed & refreshes episode names in TV shows if --titles is also passed\n");
     printf("  --version\t\t\t\tprint version\n");
     printf("  --gen-config\t\t\t\tprint default configuration to shell\n");
     printf("  --check-update\t\t\tcheck if program update is available\n");
@@ -116,6 +117,7 @@ void *tvCode(void *args) {
         if (runFlags & HTML_MODE) {
             if (tv==NULL && (runFlags & DB_MODE)==0) {
                 tv=JSONtofileList(conf->JSON_tvDB, TV_MODE);
+                tv=reverseList(tv);
                 if (tv==NULL) {
                     printError("cmyflix warning", false, HYEL, "Running in HTML mode but no database could be found!\nBuilding new database...\n");
                     tv=createTVShowDB(conf); // find files and create/edit database
@@ -156,6 +158,7 @@ void *movieCode(void *args) {
         if (runFlags & HTML_MODE) {
             if (movies==NULL && (runFlags & DB_MODE)==0) {
                 movies=JSONtofileList(conf->JSON_moDB, MO_MODE);
+                movies=reverseList(movies);
                 if (movies==NULL) {
                     movies=createMoviesDB(conf);
                     if (movies!=NULL) {
@@ -343,11 +346,12 @@ int main(int argc, char * argv[]) {
         {"id",              required_argument, 0, '4'},
         {"poster",          required_argument, 0, '5'},
         {"name",            required_argument, 0, '6'},
-        {"refresh",         no_argument,       0, '7'},
-        {"version",         no_argument,       0, '8'},
-        {"gen-config",      no_argument,       0, '9'},
+        {"titles",          no_argument,       0, '7'},
+        {"refresh",         no_argument,       0, '8'},
+        {"version",         no_argument,       0, '9'},
         {"check-update",    no_argument,       0, 'u'},
         {"clean",           no_argument,       0, 'c'},
+        {"gen-config",      no_argument,       0, 'g'},
         {"help",            no_argument,       0, 'h'},
         {"movies",          no_argument,       0, 'm'},
         {"quiet",           no_argument,       0, 'q'},
@@ -407,12 +411,14 @@ int main(int argc, char * argv[]) {
         } else if (currOption=='6') { // --name
             fixName=optarg;
             runFlags |= FIX_NAME_MODE;
-        } else if (currOption=='7') { // --refresh
+        } else if (currOption=='7') { // --titles
+            runFlags |= FIX_TITLES_MODE; 
+        } else if (currOption=='8') { // --refresh
             runFlags |= FIX_REFR_MODE; 
-        } else if (currOption=='8') { // --version
+        } else if (currOption=='9') { // --version
             printVersion();
             exit(EXIT_SUCCESS);
-        } else if (currOption=='9') { // --gen-config
+        } else if (currOption=='g') { // --gen-config
             printf("%s\n", DEF_CONF);
             exit(EXIT_SUCCESS);
         } else if (currOption=='c') { // --clean
@@ -494,7 +500,7 @@ int main(int argc, char * argv[]) {
 
     if (runFlags & FIX_MODE) { // if in fix mode
         // if in either TV show mode or movie mode *AND* ( --id or --poster or --name)
-        if (((runFlags & SHOWS_MODE) || (runFlags & MOVIES_MODE)) && ((runFlags & FIX_ID_MODE) || (runFlags & FIX_POSTER_MODE) || (runFlags & FIX_NAME_MODE) || (runFlags & FIX_REFR_MODE))) {
+        if (((runFlags & SHOWS_MODE) || (runFlags & MOVIES_MODE)) && ((runFlags & FIX_ID_MODE) || (runFlags & FIX_POSTER_MODE) || (runFlags & FIX_NAME_MODE) || (runFlags & FIX_TITLES_MODE) || (runFlags & FIX_REFR_MODE))) {
             bool refreshMode=false;
             if (runFlags & FIX_REFR_MODE) {
                 refreshMode=true;

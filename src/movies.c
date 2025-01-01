@@ -61,6 +61,7 @@ struct fileList *createMoviesDB(progConfig *conf) {
                 temp->dataSize--;
             }
         }
+        movieJSON=reverseList(movieJSON);
         char *jsonStr=fileListToJSONStr(movieJSON);
         if (jsonStr!=NULL) {
             cJSON_Delete(conf->JSON_moDB);
@@ -128,6 +129,7 @@ struct fileList *createMoviesDB(progConfig *conf) {
                     temp->dataSize--;
                 }
             }
+            hmovieJSON=reverseList(hmovieJSON);
             char *jsonStr=fileListToJSONStr(hmovieJSON);
             if (jsonStr!=NULL) {
                 cJSON_Delete(conf->JSON_moDB);

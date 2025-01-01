@@ -116,12 +116,21 @@ fileList *sortedJoinLists(fileList *part1, fileList *part2, size_t cmpPos, bool 
            name2=part2->data[cmpPos];
        }
 
-       if (name1!=NULL && name2!=NULL && strcmp(name1, name2)<0 && isAscending==true) { // name2 is later in the alphabet
-            list=part1;
-            list->next=sortedJoinLists(part1->next, part2, cmpPos, isAscending, mode);
-        } else {
-            list=part2;
-            list->next=sortedJoinLists(part1, part2->next, cmpPos, isAscending, mode);
+        if (name1 != NULL && name2 != NULL) {
+            int cmp = strcasecmp(name1, name2);
+            if ((cmp < 0 && isAscending) || (cmp > 0 && !isAscending)) {
+                list = part1;
+                list->next = sortedJoinLists(part1->next, part2, cmpPos, isAscending, mode);
+            } else {
+                list = part2;
+                list->next = sortedJoinLists(part1, part2->next, cmpPos, isAscending, mode);
+            }
+        } else if (name1 == NULL) {
+            list = part2;
+            list->next = sortedJoinLists(part1, part2->next, cmpPos, isAscending, mode);
+        } else if (name2 == NULL) {
+            list = part1;
+            list->next = sortedJoinLists(part1->next, part2, cmpPos, isAscending, mode);
         }
     }
     return list;
@@ -295,4 +304,21 @@ char *fileListToJSONStr(fileList *list) {
     }
     strlcat(listStr, "]", sizeStr);
     return listStr;
+}
+
+fileList *reverseList(fileList *head) {
+    fileList *prev = NULL;
+    fileList *current = head;
+    fileList *next = NULL;
+    size_t listSize = 0;
+    
+    while (current != NULL) {
+        next = current->next;    
+        current->next = prev;    
+        prev = current;
+        current->listSize = ++listSize;
+        current = next;          
+    }
+
+    return prev; // The new head of the reversed list
 }

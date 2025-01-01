@@ -23,6 +23,7 @@ fileList *JSONtofileList(cJSON *json, ioMode mode);
 void splitList(fileList *list, fileList **part1, fileList **part2);
 // mergeSort a list
 void msortList(fileList **list, size_t cmpPos, bool isAscending, sortMode mode);
+fileList *reverseList(fileList *head);
 void freeList(struct fileList *list);
 void printList(fileList *list);
 // save fileList to a file, header is a string to be put at the top of the file

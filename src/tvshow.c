@@ -615,20 +615,20 @@ void createShowsHTML(progConfig *conf, fileList *list) {
     addData(htmlList, TV_HTML_TOP);
     
     char *htmlStr=NULL;
-    for (i--; i>=0; i--) {
-        pthread_join(threads[i], NULL);
+    for (int j=0; j<i; j++) {
+        pthread_join(threads[j], NULL);
         char *showFile=NULL;
         char *showPoster=NULL;
-        if (checkFolder(threadObj[i].list->data[0], false)==0) {
-            showFile=getRelativePath(conf->TVhtml, threadObj[i].list->data[0]);
+        if (checkFolder(threadObj[j].list->data[0], false)==0) {
+            showFile=getRelativePath(conf->TVhtml, threadObj[j].list->data[0]);
         } else {
-            fatalError_exit("createShowsHTML", "could not find \"%s\";\nExiting...\n", threadObj[i].list->data[0]);
+            fatalError_exit("createShowsHTML", "could not find \"%s\";\nExiting...\n", threadObj[j].list->data[0]);
         }
         
-        if (checkFolder(threadObj[i].list->data[1], false)==0) {
-            showPoster=getRelativePath(conf->TVhtml, threadObj[i].list->data[1]);
+        if (checkFolder(threadObj[j].list->data[1], false)==0) {
+            showPoster=getRelativePath(conf->TVhtml, threadObj[j].list->data[1]);
         } else {
-            fatalError_exit("createShowsHTML", "could not find \"%s\";\nExiting...\n", threadObj[i].list->data[1]);
+            fatalError_exit("createShowsHTML", "could not find \"%s\";\nExiting...\n", threadObj[j].list->data[1]);
         }
 
         if (showPoster==NULL) {
@@ -636,17 +636,17 @@ void createShowsHTML(progConfig *conf, fileList *list) {
             mallocMacro(showPoster, 1, "createShowsHTML error");
             showPoster[0]='\0';
         }
-        char *showName=threadObj[i].list->data[2];
+        char *showName=threadObj[j].list->data[2];
 
-        size_t htmlStrSize=strlen(TV_HTML_FRAME)+strlen(showFile)+strlen(showPoster)+strlen(showName)*2+intSize(i)+1;
+        size_t htmlStrSize=strlen(TV_HTML_FRAME)+strlen(showFile)+strlen(showPoster)+strlen(showName)*2+intSize(j)+1;
         htmlStr=realloc(htmlStr, htmlStrSize);
         if (htmlStr==NULL) {
             fatalError_abort("createShowsHTML error", "could not realloc;\nError: %s;\n", strerror(errno));
         }
-        snprintf(htmlStr, htmlStrSize, TV_HTML_FRAME, i, showName, showFile, showPoster, showName, i, i, i);
+        snprintf(htmlStr, htmlStrSize, TV_HTML_FRAME, j, showName, showFile, showPoster, showName, j, j, j);
 
         addData(htmlList, htmlStr);
-        freeList(threadObj[i].list);
+        freeList(threadObj[j].list);
         tryFree(showFile);
         tryFree(showPoster);
     }
