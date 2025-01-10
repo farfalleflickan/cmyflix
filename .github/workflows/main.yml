@@ -1,9 +1,6 @@
 name: Build and Release DEB
 
 on:
-  push:
-    tags:
-      - "*"
   workflow_dispatch:
 
 jobs:
