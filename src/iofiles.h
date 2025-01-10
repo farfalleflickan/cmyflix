@@ -9,4 +9,4 @@ typedef enum {
     TV_MODE=1 << 3  // TV show mode
 } ioMode;
 
-struct fileList *find(progConfig *conf, char *dirPath, char *searchStr, ioMode mode, bool recursive);
+struct fileList *find(progConfig *conf, char *dirPath, char **searchStrs, ioMode mode, bool recursive);

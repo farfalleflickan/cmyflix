@@ -14,7 +14,7 @@
 #define tmdbTV_ID "https://api.themoviedb.org/3/search/tv?page=1&query=" // name&api_key=blah +opts
 #define tmdbTV_Opts "&language=en" //to find the ID based on name
 #define tmdbImg "https://image.tmdb.org/t/p/original"
-#define videoExt "mp4"
+#define videoExt (char *[]){"mp4", "mkv", "ogv", "webm", NULL}
 #define subExt1 "srt"
 #define subExt2 "vtt"
 

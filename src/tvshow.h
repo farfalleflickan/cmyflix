@@ -26,7 +26,10 @@
 
 #define SHOW_HTML_SPAN "<span onclick=\"javascript:hideVideoModal()\" class=\"close\">&times;</span>\n<p id=\"epTitle\">%s</p>"
 
-#define SHOW_HTML_VIDEO "\n<video id=\"F%d_%d\" class=\"video_player\" controls preload=\"none\" onplaying=\"javascript:rezHandler()\">\n<source src=\"../%s\" type=\"video/mp4\">"
+#define SHOW_HTML_VIDEO      "\n<video id=\"F%d_%d\" class=\"video_player\" controls preload=\"none\" onplaying=\"javascript:rezHandler()\">\n<source src=\"../%s\">"
+#define SHOW_HTML_VIDEO_WEBM "\n<video id=\"F%d_%d\" class=\"video_player\" controls preload=\"none\" onplaying=\"javascript:rezHandler()\">\n<source src=\"../%s\" type=\"video/webm\">"
+#define SHOW_HTML_VIDEO_MP4  "\n<video id=\"F%d_%d\" class=\"video_player\" controls preload=\"none\" onplaying=\"javascript:rezHandler()\">\n<source src=\"../%s\" type=\"video/mp4\">"
+#define SHOW_HTML_VIDEO_OGG  "\n<video id=\"F%d_%d\" class=\"video_player\" controls preload=\"none\" onplaying=\"javascript:rezHandler()\">\n<source src=\"../%s\" type=\"video/ogg\">"
 
 #define SHOW_HTML_SUBS "\n<track src=\"../%s\" kind=\"subtitles\" label=\"%s\">"
 

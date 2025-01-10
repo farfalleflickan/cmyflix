@@ -603,7 +603,7 @@ char *randStr(size_t size) {
 char *getSubs(progConfig *conf, char *fileStr, char *filePath) {
     char *epSubs=NULL;
     char *fileName=removeExtension(fileStr);
-    fileList *subs=find(conf, filePath, fileName, FI_MODE, false);
+    fileList *subs=find(conf, filePath, (char *[]){fileName, NULL}, FI_MODE, false);
 
     for (fileList *tempSub=subs; tempSub!=NULL; tempSub=tempSub->next) {
         if (tempSub->dataSize>2) {

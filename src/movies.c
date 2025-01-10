@@ -15,7 +15,7 @@ struct fileList *createMoviesDB(progConfig *conf) {
     char *infoStr="building home movies' database...";
     if (conf->homeMovies==false) {
         infoStr="building movies' database...";
-        folders=find(conf, conf->MoviesPath, "", DI_MODE, false);
+        folders=find(conf, conf->MoviesPath, (char *[]){"", NULL}, DI_MODE, false);
     }
     printInfo("createMoviesDB info", true, "%s\n", infoStr);
 
@@ -432,11 +432,25 @@ void *movieHTML(void *threadArg) {
     }
     printInfo("movieHTML info", true, "building HTML for \"%s\";\n", movieName);
 
-    size_t tempStrSize=strlen(MOVIE_HTML_VIDEO)+intSize(thisThread->id)*3+strlen(moviePoster)+strlen(movieFile)+strlen(movieName)*2+1;
     char *tempStr=NULL;
-    mallocMacro(tempStr, tempStrSize, "movieHTML error");
-
-    snprintf(tempStr, tempStrSize, MOVIE_HTML_VIDEO, thisThread->id, movieName, moviePoster, movieName, thisThread->id, thisThread->id, movieFile); 
+    size_t tempStrSize = 0;
+    if (strstr(movieFile, ".webm") != NULL) {
+        tempStrSize=strlen(MOVIE_HTML_VIDEO_WEBM)+intSize(thisThread->id)*3+strlen(moviePoster)+strlen(movieFile)+strlen(movieName)*2+1;
+        mallocMacro(tempStr, tempStrSize, "movieHTML error");
+        snprintf(tempStr, tempStrSize, MOVIE_HTML_VIDEO_WEBM, thisThread->id, movieName, moviePoster, movieName, thisThread->id, thisThread->id, movieFile); 
+    } else if (strstr(movieFile, ".ogv") != NULL) {
+        tempStrSize=strlen(MOVIE_HTML_VIDEO_OGG)+intSize(thisThread->id)*3+strlen(moviePoster)+strlen(movieFile)+strlen(movieName)*2+1;
+        mallocMacro(tempStr, tempStrSize, "movieHTML error");
+        snprintf(tempStr, tempStrSize, MOVIE_HTML_VIDEO_OGG, thisThread->id, movieName, moviePoster, movieName, thisThread->id, thisThread->id, movieFile); 
+    } else if (strstr(movieFile, ".mp4") != NULL) {
+        tempStrSize=strlen(MOVIE_HTML_VIDEO_MP4)+intSize(thisThread->id)*3+strlen(moviePoster)+strlen(movieFile)+strlen(movieName)*2+1;
+        mallocMacro(tempStr, tempStrSize, "movieHTML error");
+        snprintf(tempStr, tempStrSize, MOVIE_HTML_VIDEO_MP4, thisThread->id, movieName, moviePoster, movieName, thisThread->id, thisThread->id, movieFile); 
+    } else {
+        tempStrSize=strlen(MOVIE_HTML_VIDEO)+intSize(thisThread->id)*3+strlen(moviePoster)+strlen(movieFile)+strlen(movieName)*2+1;
+        mallocMacro(tempStr, tempStrSize, "movieHTML error");
+        snprintf(tempStr, tempStrSize, MOVIE_HTML_VIDEO, thisThread->id, movieName, moviePoster, movieName, thisThread->id, thisThread->id, movieFile); 
+    }
     addData(thisThread->list, tempStr);
 
     cJSON *currSub=NULL;
@@ -454,7 +468,7 @@ void *movieHTML(void *threadArg) {
         }
         tryFree(subPath);
     }
-    addData(thisThread->list, MOVIE_HTML_VIDEO_BOT);
+    addData(thisThread->list, MOVIE_HTML_VIDEO_BOTTOM);
     tryFree(moviePoster);
     tryFree(movieFile);
     tryFree(tempStr);

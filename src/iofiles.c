@@ -10,7 +10,7 @@
 #include "iofiles.h"
 
 // Own implementation with opendir/readdir. nftw might be faster? Dunno, nftw seemed slower in tests
-struct fileList *find(progConfig *conf, char *dirPath, char *searchStr, ioMode mode, bool recursive) {
+struct fileList *find(progConfig *conf, char *dirPath, char **searchStrs, ioMode mode, bool recursive) {
     DIR *directory = opendir(dirPath);
     if (directory == NULL) {
         printError("find warning", false, HYEL, "failed while opening directory \"%s\";\nError: %s;\n", dirPath, strerror(errno));
@@ -46,7 +46,7 @@ struct fileList *find(progConfig *conf, char *dirPath, char *searchStr, ioMode m
                         list = initList(list, NULL, 0);
                         addData(list, path);
                     }
-                    fileList *temp = find(conf, path, searchStr, mode, recursive);
+                    fileList *temp = find(conf, path, searchStrs, mode, recursive);
                     if (temp != NULL) {
                         list = joinLists(list, temp);
                     }
@@ -56,36 +56,41 @@ struct fileList *find(progConfig *conf, char *dirPath, char *searchStr, ioMode m
                     addData(newFile, fileP->d_name);
                     list=joinLists(newFile, list);
                 }
-            } else if (strstr(fileP->d_name, searchStr) && (mode & FI_MODE)!=0) { // if filename matches the string we looking for AND in file mode
-                char **fileMatch = NULL;
-                if ((mode & TV_MODE)!=0) { // if TV mode bit set
-                    // if ( conf->tvDB_exists==true && (mode & CK_MODE)!=0 && strstr(conf->tvDB_str, path)!=NULL) { // if filename already in database & in 'check mode'
-                    for (int i=0; i<conf->regexTVnum && fileMatch == NULL; i++) {
-                        fileMatch=matchReg(path, conf->regexTVstr[i], conf->regexTVgroups);
-                        if (fileMatch!=NULL) {
-                            fileList *newFile=newList();
-                            for (int j=1; j<=parseStrToInt(fileMatch[0]); j++) {
-                                addData(newFile, fileMatch[j]);
-                                if (j==1) {
-                                    addData(newFile, dirPath);
-                                    addData(newFile, fileP->d_name);
+            } else if ((mode & FI_MODE)!=0) { // if filename matches the string we looking for AND in file mode
+                for (char **currentStr = searchStrs; *currentStr != NULL; currentStr++) {
+                    if (strstr(fileP->d_name, *currentStr) != NULL) {
+                        char **fileMatch = NULL;
+                        if ((mode & TV_MODE)!=0) { // if TV mode bit set
+                            // if ( conf->tvDB_exists==true && (mode & CK_MODE)!=0 && strstr(conf->tvDB_str, path)!=NULL) { // if filename already in database & in 'check mode'
+                            for (int i=0; i<conf->regexTVnum && fileMatch == NULL; i++) {
+                                fileMatch=matchReg(path, conf->regexTVstr[i], conf->regexTVgroups);
+                                if (fileMatch!=NULL) {
+                                    fileList *newFile=newList();
+                                    for (int j=1; j<=parseStrToInt(fileMatch[0]); j++) {
+                                        addData(newFile, fileMatch[j]);
+                                        if (j==1) {
+                                            addData(newFile, dirPath);
+                                            addData(newFile, fileP->d_name);
+                                        }
+                                    }
+                                    list = joinLists(newFile, list);                       
                                 }
                             }
-                            list = joinLists(newFile, list);                       
+                        } else if ((mode & MO_MODE)!=0) { // if movie mode bit set...
+                            /*
+                            * Nothing, else works just as well
+                            */
+                        } else { // if in file mode but NOT in movie/tv mode...
+                            fileList *newFile=newList();
+                            addData(newFile, path);
+                            addData(newFile, dirPath);
+                            addData(newFile, fileP->d_name);
+                            list=joinLists(newFile, list);
                         }
+                        freeStrArr(fileMatch);
+                        break;
                     }
-                } else if ((mode & MO_MODE)!=0) { // if movie mode bit set...
-                    /*
-                     * Nothing, else works just as well
-                     */
-                } else { // if in file mode but NOT in movie/tv mode...
-                    fileList *newFile=newList();
-                    addData(newFile, path);
-                    addData(newFile, dirPath);
-                    addData(newFile, fileP->d_name);
-                    list=joinLists(newFile, list);
                 }
-                freeStrArr(fileMatch);
             }
             tryFree(path);
         }

@@ -15,7 +15,7 @@
 // JSON maker
 struct fileList *createTVShowDB(progConfig *conf) {
     printInfo("createTVShowDB info", true, "building TV shows' database...\n");
-    fileList *showFolders=find(conf, conf->TVpath, "", DI_MODE, false);
+    fileList *showFolders=find(conf, conf->TVpath, (char *[]){"", NULL}, DI_MODE, false);
 
     if (showFolders != NULL ) {
         int foldersListSize=showFolders->listSize, i=0;
@@ -119,7 +119,7 @@ void *findSeasons(void *threadArg) { // runs in Show.Name folder and spawns thre
     }
     // Find all the seasons of the current tv show
     printInfo("findSeasons info", true, "looking for seasons' folders in: \"%s\";\n", showPath);
-    fileList *seasonsList = find(conf, showPath, "", DI_MODE, false); // get all seasons folders
+    fileList *seasonsList = find(conf, showPath, (char *[]){"", NULL}, DI_MODE, false); // get all seasons folders
     
     if (seasonsList!=NULL && seasonsList->data!=NULL) {
         bool showHasExtras=false;
@@ -276,7 +276,7 @@ void *findSeasons(void *threadArg) { // runs in Show.Name folder and spawns thre
             tryFree(extrasJSONStr);
             tryFree(tempShowJSONStr);
         } else {
-            printError("findSeasons warning", false, HYEL, "please note, could not find any \".%s\" in path \"%s\"\n", videoExt, showPath);
+            printError("findSeasons warning", false, HYEL, "please note, could not find any in path \"%s\"\n", showPath);
         }
     } else {
         printError("findSeasons warning", false, HYEL, "please note, path \"%s\" is empty!\n", showPath);
@@ -432,9 +432,13 @@ void *findEpisodes(void *threadArg) { // find files of 'this' season
 
             if (epName==NULL) {
                 if (temp->dataSize>5 && seasonExtra==false) {
-                    if (strcmp(temp->data[6], videoExt)==0) { 
-                        epName=removeExtension(temp->data[2]);
-                    } else {
+                    for (char **currentStr = videoExt; *currentStr != NULL; currentStr++) {
+                        if (strcmp(temp->data[6], *currentStr)==0) { 
+                            epName=removeExtension(temp->data[2]);
+                            break;
+                        }
+                    }
+                    if (epName==NULL) {
                         epName=removeExtension(temp->data[6]);
                     }
                 } else {
@@ -849,12 +853,35 @@ void episodeHTML(fileList *this_show, progConfig *conf, cJSON *episode, int *cur
     snprintf(tempStr, tempStrSize, SHOW_HTML_SPAN, this_episodeName);
     addData(this_show, tempStr);
 
-    tempStrSize=intSize(*uuid)+intSize(*uuidEpisode)+strlen(this_file)+strlen(SHOW_HTML_VIDEO)+1;
-    tempStr=realloc(tempStr, tempStrSize);
-    if (tempStr==NULL) {
-        fatalError_abort("episodeHTML error", "could not realloc;\nError: %s;\n", strerror(errno));
+    if (strstr(this_file, ".webm") != NULL) {
+        tempStrSize=intSize(*uuid)+intSize(*uuidEpisode)+strlen(this_file)+strlen(SHOW_HTML_VIDEO_WEBM)+1;
+        tempStr=realloc(tempStr, tempStrSize);
+        if (tempStr==NULL) {
+            fatalError_abort("episodeHTML error", "could not realloc;\nError: %s;\n", strerror(errno));
+        }
+        snprintf(tempStr, tempStrSize, SHOW_HTML_VIDEO_WEBM, *uuid, *uuidEpisode, this_file);
+    } else if (strstr(this_file, ".ogv") != NULL) {
+        tempStrSize=intSize(*uuid)+intSize(*uuidEpisode)+strlen(this_file)+strlen(SHOW_HTML_VIDEO_OGG)+1;
+        tempStr=realloc(tempStr, tempStrSize);
+        if (tempStr==NULL) {
+            fatalError_abort("episodeHTML error", "could not realloc;\nError: %s;\n", strerror(errno));
+        }
+        snprintf(tempStr, tempStrSize, SHOW_HTML_VIDEO_OGG, *uuid, *uuidEpisode, this_file);
+    } else if (strstr(this_file, ".mp4") != NULL) {
+        tempStrSize=intSize(*uuid)+intSize(*uuidEpisode)+strlen(this_file)+strlen(SHOW_HTML_VIDEO_MP4)+1;
+        tempStr=realloc(tempStr, tempStrSize);
+        if (tempStr==NULL) {
+            fatalError_abort("episodeHTML error", "could not realloc;\nError: %s;\n", strerror(errno));
+        }
+        snprintf(tempStr, tempStrSize, SHOW_HTML_VIDEO_MP4, *uuid, *uuidEpisode, this_file);  
+    } else {
+        tempStrSize=intSize(*uuid)+intSize(*uuidEpisode)+strlen(this_file)+strlen(SHOW_HTML_VIDEO)+1;
+        tempStr=realloc(tempStr, tempStrSize);
+        if (tempStr==NULL) {
+            fatalError_abort("episodeHTML error", "could not realloc;\nError: %s;\n", strerror(errno));
+        }
+        snprintf(tempStr, tempStrSize, SHOW_HTML_VIDEO, *uuid, *uuidEpisode, this_file);  
     }
-    snprintf(tempStr, tempStrSize, SHOW_HTML_VIDEO, *uuid, *uuidEpisode, this_file);
     addData(this_show, tempStr);
 
     cJSON *currSub=NULL;
