@@ -3,7 +3,8 @@ name: Build and Release DEB
 on:
   push:
     tags:
-      - "v*"  # or "v*.*.*"
+      - "*"
+  workflow_dispatch:
 
 jobs:
   build-deb:
