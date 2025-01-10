@@ -1,0 +1,67 @@
+name: Build and Release DEB
+
+on:
+  push:
+    tags:
+      - "v*"  # or "v*.*.*"
+
+jobs:
+  build-deb:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libbsd-dev libcjson-dev libcurl4-openssl-dev
+
+      - name: Build DEB
+        run: |
+          # Your command that ultimately places a .deb file under deb/
+          make deb
+
+      - name: Upload DEB artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: deb-package
+          # Upload all .deb files in deb/ (assuming only one is created)
+          path: deb/*.deb
+
+  create-release:
+    needs: build-deb
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download DEB artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: deb-package
+          path: .
+
+      - name: Find the DEB filename
+        id: find_deb
+        run: |
+          # We expect exactly one .deb in the current directory
+          echo "deb_file=$(ls *.deb)" >> $GITHUB_OUTPUT
+
+      - name: Create or Update GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: "Release ${{ github.ref_name }}"
+          draft: false
+          prerelease: false
+
+      - name: Upload DEB to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.find_deb.outputs.deb_file }}
+          asset_name: ${{ steps.find_deb.outputs.deb_file }}
+          asset_content_type: "application/vnd.debian.binary-package"
