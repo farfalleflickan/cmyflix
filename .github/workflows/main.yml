@@ -20,7 +20,7 @@ jobs:
           make deb
 
       - name: Upload DEB artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: deb-package
           path: deb/*.deb
@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download DEB artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: deb-package
           path: .
@@ -51,7 +51,7 @@ jobs:
         with:
           tag_name: ${{ steps.find_deb.outputs.version }}
           release_name: "cmyflix v${{ steps.find_deb.outputs.version }}"
-          draft: true   
+          draft: true
           prerelease: false
 
       - name: Upload DEB to Release
