@@ -646,9 +646,14 @@ char *getSubs(progConfig *conf, char *fileStr, char *filePath) {
                         char *subLangFound=strrchr(fileName, '_');
                         char *subLang=NULL;
                         if (subLangFound==NULL){
-                            subLang=NULL;
-                            mallocMacro(subLang, 4, "getSubs error");
-                            strlcpy(subLang, "_en", 4);
+                            subLangFound=strrchr(fileName, '.');
+                            if (subLangFound==NULL || strlen(subLangFound) > 4) { //we assume we matched .SXXEXX so our sub is probably default (english)
+                                subLang=NULL;
+                                mallocMacro(subLang, 4, "getSubs error");
+                                strlcpy(subLang, "_en", 4);
+                            } else {
+                                subLang=subLangFound;
+                            }
                         } else {
                             subLang=subLangFound;
                         }
@@ -687,9 +692,14 @@ char *getSubs(progConfig *conf, char *fileStr, char *filePath) {
                 char *subLangFound=strrchr(fileName, '_');
                 char *subLang=NULL;
                 if (subLangFound==NULL){
-                    subLang=NULL;
-                    mallocMacro(subLang, 4, "getSubs error");
-                    strlcpy(subLang, "_en", 4);
+                    subLangFound=strrchr(fileName, '.');
+                    if (subLangFound==NULL || strlen(subLangFound) > 4) { //we assume we matched .SXXEXX so our sub is probably default (english)
+                        subLang=NULL;
+                        mallocMacro(subLang, 4, "getSubs error");
+                        strlcpy(subLang, "_en", 4);
+                    } else {
+                        subLang=subLangFound;
+                    }
                 } else {
                     subLang=subLangFound;
                 }
