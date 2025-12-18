@@ -57,7 +57,9 @@ typedef struct progConfig {
         bool tvDB_exists;
         bool moDB_exists;
         char *tvDB_str;
+		size_t tvDB_str_fileLen;
         char *moDB_str;
+        size_t moDB_str_fileLen;
         cJSON *JSON_tvDB;
         cJSON *JSON_moDB;
         

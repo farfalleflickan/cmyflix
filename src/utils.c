@@ -429,7 +429,7 @@ void tryFree(void *ptr){
 }
 
 // use mmap to read file to memory
-char *fileToMem(const char *filePath) {
+size_t fileToMem(const char *filePath, char** fileMap) {
     int file = open(filePath, O_RDONLY);
 
     if (file < 0 ) {
@@ -442,23 +442,22 @@ char *fileToMem(const char *filePath) {
     }
 
     size_t fileSize=fileProp.st_size;
-    char *fileMap=NULL;
+    *fileMap=NULL;
     if (fileSize>0) {
-        fileMap=mmap(NULL, fileSize, PROT_READ, MAP_PRIVATE, file, 0);
-        if (fileMap==MAP_FAILED) {
+        *fileMap=mmap(NULL, fileSize, PROT_READ, MAP_PRIVATE, file, 0);
+        if (*fileMap==MAP_FAILED) {
             fatalError_abort("fileToMem error", "could not use 'mmap' on file: \"%s\";\nError: %s;\n", filePath, strerror(errno));
         }
     }
-    return fileMap;
+    close(file);
+    return fileSize;
 }
 
-int freeFileMem(const char *filePath, char *fileStr) {
-    struct stat fileProp;
-    if (stat(filePath, &fileProp)==-1) {
-        fatalError_abort("freeFileMem error", "could not get filesize of: \"%s\";\nError: %s;\n", filePath, strerror(errno));
+int freeFileMem(const char *filePath, char *fileStr, size_t fileSize) {
+    if (!fileStr || fileSize == 0) {
+        return 0;
     }
 
-    size_t fileSize=fileProp.st_size;
     int ret = munmap(fileStr, fileSize);
     if ( ret == -1){
         fatalError_abort("freeFileMem error", "could not use 'munmap' on file: \"%s\";\nError: %s;\n", filePath, strerror(errno));

@@ -27,7 +27,8 @@ progConfig *getConfig(char *srcPath) {
     curl_share_setopt(options->cURLshare, CURLSHOPT_USERDATA, options->cURLconnLock);
     
     // map config file
-    char *fileMap=fileToMem(srcPath);
+    char *fileMap=NULL;
+    size_t fileMapFileSize = fileToMem(srcPath, &fileMap);
     if (fileMap==NULL) {
         fatalError_exit("getConfig error", "configuration file \"%s\" is empty!\n%sUse \"cmyflix --gen-config > %s\" to generate default.\n", srcPath, HBLU, srcPath);
     }
@@ -238,7 +239,7 @@ progConfig *getConfig(char *srcPath) {
        printError("getConfig warning", false, HYEL, "TMDBapi invalid, disabling all related features...\n");
     }
     
-    freeFileMem(srcPath, fileMap);
+    freeFileMem(srcPath, fileMap, fileMapFileSize);
     tryFree(offset);
     tryFree(buff);
 
@@ -252,7 +253,7 @@ progConfig *getConfig(char *srcPath) {
         // dbNameTV exists, load it to memory and parse the JSON
         if (access(options->dbNameTV, F_OK)==0) {
             options->JSON_tvDB=NULL;
-            options->tvDB_str=fileToMem(options->dbNameTV);
+            options->tvDB_str_fileLen=fileToMem(options->dbNameTV, &options->tvDB_str);
             options->JSON_tvDB=cJSON_Parse(options->tvDB_str);
             if (cJSON_GetErrorPtr()==NULL) {
                 options->tvDB_exists=true;
@@ -269,7 +270,7 @@ progConfig *getConfig(char *srcPath) {
         // dbNameMovie exists, load it to memory and parse the JSON
         if (access(options->dbNameMovie, F_OK)==0) {
             options->JSON_moDB=NULL;
-            options->moDB_str=fileToMem(options->dbNameMovie);
+            options->moDB_str_fileLen=fileToMem(options->dbNameMovie, &options->moDB_str);
             options->JSON_moDB=cJSON_Parse(options->moDB_str);
             if (cJSON_GetErrorPtr()==NULL) {
                 options->moDB_exists=true;
@@ -301,10 +302,10 @@ progConfig *getConfig(char *srcPath) {
 // free everything that conf allocates
 void confCleanup(progConfig *options) {
     if (options->tvDB_str!=NULL) {
-        freeFileMem(options->dbNameTV, options->tvDB_str);
+        freeFileMem(options->dbNameTV, options->tvDB_str, options->tvDB_str_fileLen);
     }
     if (options->moDB_str!=NULL) {
-        freeFileMem(options->dbNameMovie, options->moDB_str);
+        freeFileMem(options->dbNameMovie, options->moDB_str, options->moDB_str_fileLen);
     }
     if (options->JSON_moDB!=NULL) {
         cJSON_Delete(options->JSON_moDB);
@@ -373,6 +374,8 @@ void initAll(progConfig *options) {
         options->prefImgLangTV=NULL;
         options->JSON_moDB=NULL;
         options->JSON_tvDB=NULL;
+        options->tvDB_str_fileLen=0;
+        options->moDB_str_fileLen=0;
     } else {
         fatalError_exit("initAll", "options is NULL.\n");
     }

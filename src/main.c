@@ -265,12 +265,12 @@ void cleanMode(progConfig *conf, progFlags flags) {
         if (threadArgTV.oldJSON!=NULL) {
             char *newDB=cJSON_Print(threadArgTV.oldJSON);
             cJSON_Delete(threadArgTV.oldJSON);
-            freeFileMem(conf->dbNameTV, conf->tvDB_str);
+            freeFileMem(conf->dbNameTV, conf->tvDB_str, conf->tvDB_str_fileLen);
             writeCharToFile(newDB, conf->dbNameTV);
             tryFree(newDB);
             cJSON_Delete(conf->JSON_tvDB);
             conf->JSON_tvDB=NULL;
-            conf->tvDB_str=fileToMem(conf->dbNameTV);
+            conf->tvDB_str_fileLen=fileToMem(conf->dbNameTV, &conf->tvDB_str);
             conf->JSON_tvDB=cJSON_Parse(conf->tvDB_str);
         } else {
             printInfo("cleanMode warning", true, "oldJSON was NULL!\n");
@@ -281,12 +281,12 @@ void cleanMode(progConfig *conf, progFlags flags) {
         if (threadArgMovies.oldJSON!=NULL) {
             char *newDB=cJSON_Print(threadArgMovies.oldJSON);
             cJSON_Delete(threadArgMovies.oldJSON);
-            freeFileMem(conf->dbNameMovie, conf->moDB_str);
+            freeFileMem(conf->dbNameMovie, conf->moDB_str, conf->moDB_str_fileLen);
             writeCharToFile(newDB, conf->dbNameMovie);
             tryFree(newDB);
             cJSON_Delete(conf->JSON_moDB);
             conf->JSON_moDB=NULL;
-            conf->moDB_str=fileToMem(conf->dbNameMovie);
+            conf->moDB_str_fileLen=fileToMem(conf->dbNameMovie, &conf->moDB_str);
             conf->JSON_moDB=cJSON_Parse(conf->moDB_str);
         } else {
             printInfo("cleanMode warning", true, "oldJSON was NULL!\n");
